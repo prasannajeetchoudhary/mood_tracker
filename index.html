@@ -96,33 +96,40 @@
       selectedMood = mood;
     }
 
-    async function submitMood() {
+    function submitMood(retry = false) {
       const feeling = document.getElementById('feelingText').value;
       const messageDiv = document.getElementById('thanksMessage');
+      messageDiv.innerText = "⏳ Sending... Please wait";
 
       if (!selectedMood && !feeling) {
         messageDiv.innerText = "Please select a mood or write something ❤️";
         return;
       }
 
-      try {
-        const response = await fetch('https://mood-backend-rvf9.onrender.com/api/mood', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mood: selectedMood, feeling })
-        });
-
-        if (response.ok) {
-          messageDiv.innerText = `✅ Mood sent successfully! Mood: ${selectedMood || 'Not selected'}, Note: ${feeling || 'No note'}`;
-          document.getElementById('feelingText').value = '';
-          selectedMood = '';
+      fetch('https://mood-backend-rvf9.onrender.com/api/mood', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ mood: selectedMood, feeling })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Server sleeping or unavailable');
+        return response.json();
+      })
+      .then(data => {
+        messageDiv.innerText = `✅ Thanks! Mood: ${selectedMood || 'Not selected'}, Note: ${feeling || 'No note'} 🌸`;
+        selectedMood = '';
+        document.getElementById('feelingText').value = '';
+      })
+      .catch(error => {
+        if (!retry) {
+          messageDiv.innerText = "🌙 Server might be waking up... retrying in 5 seconds ⏳";
+          setTimeout(() => submitMood(true), 5000);
         } else {
-          messageDiv.innerText = "❌ Failed to send mood. Try again.";
+          messageDiv.innerText = "❌ Still not working. Please try again later.";
         }
-      } catch (error) {
-        console.error('Error submitting mood:', error);
-        messageDiv.innerText = "❌ Error sending mood. Please try again.";
-      }
+      });
     }
   </script>
 
