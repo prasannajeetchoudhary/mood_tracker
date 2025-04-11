@@ -25,7 +25,7 @@
       gap: 15px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .mood-btn {
       font-size: 2rem;
@@ -34,11 +34,21 @@
       border-radius: 50%;
       cursor: pointer;
       background-color: #ffd6e0;
-      transition: transform 0.2s;
+      transition: transform 0.2s, background-color 0.3s;
     }
     .mood-btn:hover {
       transform: scale(1.1);
       background-color: #ffb3c6;
+    }
+    .mood-btn.selected {
+      background-color: #ff66b2;
+      color: white;
+      font-weight: bold;
+    }
+    #selectedMoodText {
+      margin-bottom: 20px;
+      font-size: 1.1em;
+      color: #444;
     }
     textarea {
       width: 80%;
@@ -74,14 +84,16 @@
 
   <h1>Hey, how are you feeling today? 🌈</h1>
   
-  <div class="moods">
-    <button class="mood-btn" onclick="selectMood('Happy')">😊</button>
-    <button class="mood-btn" onclick="selectMood('Sad')">😢</button>
-    <button class="mood-btn" onclick="selectMood('Angry')">😠</button>
-    <button class="mood-btn" onclick="selectMood('Loved')">😍</button>
-    <button class="mood-btn" onclick="selectMood('Sick')">🤒</button>
-    <button class="mood-btn" onclick="selectMood('Tired')">🥱</button>
+  <div class="moods" id="moodButtons">
+    <button class="mood-btn" onclick="selectMood(this, 'Happy', '😊')">😊</button>
+    <button class="mood-btn" onclick="selectMood(this, 'Sad', '😢')">😢</button>
+    <button class="mood-btn" onclick="selectMood(this, 'Angry', '😠')">😠</button>
+    <button class="mood-btn" onclick="selectMood(this, 'Loved', '😍')">😍</button>
+    <button class="mood-btn" onclick="selectMood(this, 'Sick', '🤒')">🤒</button>
+    <button class="mood-btn" onclick="selectMood(this, 'Tired', '🥱')">🥱</button>
   </div>
+
+  <div id="selectedMoodText"></div>
 
   <textarea id="feelingText" placeholder="Write anything you want to share... 💬"></textarea>
   <br />
@@ -91,9 +103,20 @@
 
   <script>
     let selectedMood = '';
+    let moodEmoji = '';
 
-    function selectMood(mood) {
+    function selectMood(button, mood, emoji) {
+      // Remove 'selected' from all buttons
+      const buttons = document.querySelectorAll('.mood-btn');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+
+      // Add 'selected' to the clicked button
+      button.classList.add('selected');
+
       selectedMood = mood;
+      moodEmoji = emoji;
+
+      document.getElementById('selectedMoodText').innerText = `You selected: ${emoji} ${mood}`;
     }
 
     function submitMood(retry = false) {
@@ -120,7 +143,10 @@
       .then(data => {
         messageDiv.innerText = `✅ Thanks! Mood: ${selectedMood || 'Not selected'}, Note: ${feeling || 'No note'} 🌸`;
         selectedMood = '';
+        moodEmoji = '';
         document.getElementById('feelingText').value = '';
+        document.getElementById('selectedMoodText').innerText = '';
+        document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
       })
       .catch(error => {
         if (!retry) {
