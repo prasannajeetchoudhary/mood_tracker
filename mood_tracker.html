@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How Are You Feeling?</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #fff0f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .moods {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .mood-btn {
+      font-size: 2rem;
+      padding: 15px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background-color: #ffd6e0;
+      transition: transform 0.2s;
+    }
+    .mood-btn:hover {
+      transform: scale(1.1);
+      background-color: #ffb3c6;
+    }
+    textarea {
+      width: 80%;
+      max-width: 400px;
+      height: 100px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      resize: none;
+      margin-bottom: 15px;
+    }
+    .submit-btn {
+      background-color: #ff99cc;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .submit-btn:hover {
+      background-color: #ff66b2;
+    }
+    .msg {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Hey, how are you feeling today? 🌈</h1>
+  
+  <div class="moods">
+    <button class="mood-btn" onclick="selectMood('Happy')">😊</button>
+    <button class="mood-btn" onclick="selectMood('Sad')">😢</button>
+    <button class="mood-btn" onclick="selectMood('Angry')">😠</button>
+    <button class="mood-btn" onclick="selectMood('Loved')">😍</button>
+    <button class="mood-btn" onclick="selectMood('Sick')">🤒</button>
+    <button class="mood-btn" onclick="selectMood('Tired')">🥱</button>
+  </div>
+
+  <textarea id="feelingText" placeholder="Write anything you want to share... 💬"></textarea>
+  <br />
+  <button class="submit-btn" onclick="submitMood()">Send 💌</button>
+
+  <div class="msg" id="thanksMessage"></div>
+
+  <script>
+    let selectedMood = '';
+
+    function selectMood(mood) {
+      selectedMood = mood;
+    }
+
+    function submitMood() {
+      const feeling = document.getElementById('feelingText').value;
+      const messageDiv = document.getElementById('thanksMessage');
+
+      if (!selectedMood && !feeling) {
+        messageDiv.innerText = "Please select a mood or write something ❤️";
+        return;
+      }
+
+      // Send data to backend
+      fetch('http://localhost:3000/api/mood', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mood: selectedMood,
+          feeling: feeling
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        messageDiv.innerText = "Your mood has been saved! 🧸";
+        document.getElementById('feelingText').value = '';
+        selectedMood = '';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        messageDiv.innerText = "Oops! Something went wrong. 🥲";
+      });
+    }
+  </script>
+
+</body>
+</html>
