@@ -96,7 +96,7 @@
       selectedMood = mood;
     }
 
-    function submitMood() {
+    async function submitMood() {
       const feeling = document.getElementById('feelingText').value;
       const messageDiv = document.getElementById('thanksMessage');
 
@@ -105,28 +105,25 @@
         return;
       }
 
-      // Send data to backend
-      fetch('http://localhost:3000/api/mood', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          mood: selectedMood,
-          feeling: feeling
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        messageDiv.innerText = "Your mood has been saved! 🧸";
-        document.getElementById('feelingText').value = '';
-        selectedMood = '';
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        messageDiv.innerText = "Oops! Something went wrong. 🥲";
-      });
+      try {
+        const response = await fetch('https://mood-backend-prasannajeetchoudhary.onrender.com/api/mood', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ mood: selectedMood, feeling })
+        });
+
+        if (response.ok) {
+          messageDiv.innerText = `Thanks! Mood: ${selectedMood || 'Not selected'}, Note: ${feeling || 'No note'} 🌸`;
+          document.getElementById('feelingText').value = '';
+          selectedMood = '';
+        } else {
+          messageDiv.innerText = "❌ Oops! Something went wrong while saving.";
+        }
+      } catch (error) {
+        messageDiv.innerText = "❌ Server is sleeping or offline. Try again in a few seconds.";
+      }
     }
   </script>
 
