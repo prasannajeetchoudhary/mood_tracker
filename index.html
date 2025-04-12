@@ -125,12 +125,26 @@
       color: #333;
       margin-top: 20px;
     }
+
+    select {
+      font-size: 1em;
+      padding: 5px 10px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>Hey, how are you feeling today? 🌈</h1>
+
+    <label for="userSelect">Who's checking in?</label>
+    <select id="userSelect">
+      <option value="Prasann">Prasann</option>
+      <option value="Kamakhya">Kamakhya</option>
+    </select>
 
     <div class="moods" id="moodButtons">
       <button class="mood-btn" onclick="selectMood(this, 'Happy', '😊')">😊</button>
@@ -167,7 +181,9 @@
     let selectedMood = '';
     let moodEmoji = '';
 
-    const user = 'Prasann';  // Change to 'Kamakhya' if needed
+    function getSelectedUser() {
+      return document.getElementById('userSelect').value;
+    }
 
     function selectMood(button, mood, emoji) {
       const buttons = document.querySelectorAll('.mood-btn');
@@ -181,6 +197,8 @@
     function submitMood() {
       const feeling = document.getElementById('feelingText').value;
       const messageDiv = document.getElementById('thanksMessage');
+      const user = getSelectedUser();
+
       messageDiv.innerText = "⏳ Sending... Please wait";
 
       if (!selectedMood && !feeling) {
@@ -206,7 +224,7 @@
         document.getElementById('feelingText').value = '';
         document.getElementById('selectedMoodText').innerText = '';
         document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
-        fetchMoodHistory(); // Update mood history
+        fetchMoodHistory(); // Refresh
       })
       .catch(error => {
         messageDiv.innerText = "❌ Failed to send mood.";
@@ -214,24 +232,22 @@
     }
 
     function fetchMoodHistory() {
-      // Fetch Prasann's mood history
+      // Prasann
       fetch('https://mood-backend-rvf9.onrender.com/api/mood/Prasann')
         .then(response => response.json())
         .then(moods => {
           const historyDiv = document.getElementById('prasannHistory');
           const currentMoodDiv = document.getElementById('prasannCurrentMood');
-
           historyDiv.innerHTML = moods.map(mood => `<li>${mood.mood} ${mood.feeling} - ${new Date(mood.timestamp).toLocaleString()}</li>`).join('');
-
           if (moods.length > 0) {
-            const currentMood = moods[0];  // Most recent mood
+            const currentMood = moods[0];
             currentMoodDiv.innerHTML = `Current Mood: ${currentMood.mood} ${currentMood.feeling}`;
           } else {
             currentMoodDiv.innerHTML = `Current Mood: Not set`;
           }
         });
 
-      // Fetch Kamakhya's mood history
+      // Kamakhya
       fetch('https://mood-backend-rvf9.onrender.com/api/mood/Kamakhya')
         .then(response => response.json())
         .then(moods => {
@@ -240,8 +256,10 @@
         });
     }
 
-    // Fetch on page load
-    fetchMoodHistory();
+    // Run on page load
+    window.onload = function () {
+      fetchMoodHistory();
+    };
   </script>
 
 </body>
