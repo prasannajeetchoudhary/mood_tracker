@@ -24,12 +24,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
 
     h1 {
       font-size: 2em;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+    }
+
+    select {
+      font-size: 1em;
+      padding: 5px 10px;
+      margin: 10px 0 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
     }
 
     .moods {
@@ -126,12 +133,62 @@
       margin-top: 20px;
     }
 
-    select {
-      font-size: 1em;
-      padding: 5px 10px;
-      margin-bottom: 20px;
+    #darkModeToggle {
+      background-color: #ffccdc;
+      border: none;
       border-radius: 10px;
-      border: 1px solid #ccc;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    /* 🌙 Dark mode styles */
+    body.dark {
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+    }
+
+    body.dark .mood-btn {
+      background-color: #444;
+      color: #fff;
+    }
+
+    body.dark .mood-btn:hover {
+      background-color: #666;
+    }
+
+    body.dark .mood-btn.selected {
+      background-color: #e91e63;
+    }
+
+    body.dark .submit-btn {
+      background-color: #e91e63;
+      color: white;
+    }
+
+    body.dark .submit-btn:hover {
+      background-color: #ad1457;
+    }
+
+    body.dark textarea,
+    body.dark select {
+      background-color: #333;
+      color: #eee;
+      border: 1px solid #666;
+    }
+
+    body.dark .mood-history {
+      background-color: #2c2c2c;
+    }
+
+    body.dark .current-mood {
+      color: #ffccdc;
+    }
+
+    body.dark #darkModeToggle {
+      background-color: #444;
+      color: #fff;
     }
   </style>
 </head>
@@ -139,6 +196,8 @@
 
   <div class="container">
     <h1>Hey, how are you feeling today? 🌈</h1>
+
+    <button onclick="toggleDarkMode()" id="darkModeToggle">🌙 Dark Mode</button>
 
     <label for="userSelect">Who's checking in?</label>
     <select id="userSelect">
@@ -186,8 +245,7 @@
     }
 
     function selectMood(button, mood, emoji) {
-      const buttons = document.querySelectorAll('.mood-btn');
-      buttons.forEach(btn => btn.classList.remove('selected'));
+      document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
       button.classList.add('selected');
       selectedMood = mood;
       moodEmoji = emoji;
@@ -224,7 +282,7 @@
         document.getElementById('feelingText').value = '';
         document.getElementById('selectedMoodText').innerText = '';
         document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
-        fetchMoodHistory(); // Refresh
+        fetchMoodHistory();
       })
       .catch(error => {
         messageDiv.innerText = "❌ Failed to send mood.";
@@ -256,8 +314,23 @@
         });
     }
 
-    // Run on page load
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      localStorage.setItem("darkMode", isDark);
+      document.getElementById("darkModeToggle").innerText = isDark ? "🌞 Light Mode" : "🌙 Dark Mode";
+    }
+
+    function loadDarkMode() {
+      const saved = localStorage.getItem("darkMode");
+      if (saved === "true") {
+        document.body.classList.add("dark");
+        document.getElementById("darkModeToggle").innerText = "🌞 Light Mode";
+      }
+    }
+
     window.onload = function () {
+      loadDarkMode();
       fetchMoodHistory();
     };
   </script>
