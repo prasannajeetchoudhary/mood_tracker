@@ -6,27 +6,40 @@
   <title>How Are You Feeling?</title>
   <style>
     body {
-      margin: 0;     
+      margin: 0;
       font-family: 'Comic Sans MS', cursive, sans-serif;
       background-color: #fff0f5;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
     }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
     h1 {
       font-size: 2em;
       margin-bottom: 20px;
     }
+
     .moods {
       display: flex;
-      gap: 15px;
       flex-wrap: wrap;
+      gap: 15px;
       justify-content: center;
       margin-bottom: 10px;
     }
+
     .mood-btn {
       font-size: 2rem;
       padding: 15px;
@@ -36,22 +49,26 @@
       background-color: #ffd6e0;
       transition: transform 0.2s, background-color 0.3s;
     }
+
     .mood-btn:hover {
       transform: scale(1.1);
       background-color: #ffb3c6;
     }
+
     .mood-btn.selected {
       background-color: #ff66b2;
       color: white;
       font-weight: bold;
     }
+
     #selectedMoodText {
       margin-bottom: 20px;
       font-size: 1.1em;
       color: #444;
     }
+
     textarea {
-      width: 80%;
+      width: 100%;
       max-width: 400px;
       height: 100px;
       padding: 10px;
@@ -60,7 +77,9 @@
       font-size: 1em;
       resize: none;
       margin-bottom: 15px;
+      box-sizing: border-box;
     }
+
     .submit-btn {
       background-color: #ff99cc;
       padding: 10px 20px;
@@ -70,56 +89,96 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
+
     .submit-btn:hover {
       background-color: #ff66b2;
     }
+
     .msg {
       margin-top: 20px;
       font-size: 1.2em;
       color: #555;
     }
+
+    .mood-history {
+      width: 100%;
+      max-width: 500px;
+      padding: 10px;
+      margin: 20px 0;
+      background-color: #ffebf5;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    .mood-history ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .mood-history li {
+      margin-bottom: 10px;
+    }
+
+    .current-mood {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #333;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Hey, how are you feeling today? 🌈</h1>
-  
-  <div class="moods" id="moodButtons">
-    <button class="mood-btn" onclick="selectMood(this, 'Happy', '😊')">😊</button>
-    <button class="mood-btn" onclick="selectMood(this, 'Sad', '😢')">😢</button>
-    <button class="mood-btn" onclick="selectMood(this, 'Angry', '😠')">😠</button>
-    <button class="mood-btn" onclick="selectMood(this, 'Loved', '😍')">😍</button>
-    <button class="mood-btn" onclick="selectMood(this, 'Sick', '🤒')">🤒</button>
-    <button class="mood-btn" onclick="selectMood(this, 'Tired', '🥱')">🥱</button>
+  <div class="container">
+    <h1>Hey, how are you feeling today? 🌈</h1>
+
+    <div class="moods" id="moodButtons">
+      <button class="mood-btn" onclick="selectMood(this, 'Happy', '😊')">😊</button>
+      <button class="mood-btn" onclick="selectMood(this, 'Sad', '😢')">😢</button>
+      <button class="mood-btn" onclick="selectMood(this, 'Angry', '😠')">😠</button>
+      <button class="mood-btn" onclick="selectMood(this, 'Loved', '😍')">😍</button>
+      <button class="mood-btn" onclick="selectMood(this, 'Sick', '🤒')">🤒</button>
+      <button class="mood-btn" onclick="selectMood(this, 'Tired', '🥱')">🥱</button>
+    </div>
+
+    <div id="selectedMoodText"></div>
+
+    <textarea id="feelingText" placeholder="Write anything you want to share... 💬"></textarea>
+    <br />
+    <button class="submit-btn" onclick="submitMood()">Send 💌</button>
+
+    <div class="msg" id="thanksMessage"></div>
   </div>
 
-  <div id="selectedMoodText"></div>
+  <div class="mood-history">
+    <h2>Kamakhya's Mood History</h2>
+    <ul id="kamakhyaHistory"></ul>
+  </div>
 
-  <textarea id="feelingText" placeholder="Write anything you want to share... 💬"></textarea>
-  <br />
-  <button class="submit-btn" onclick="submitMood()">Send 💌</button>
-
-  <div class="msg" id="thanksMessage"></div>
+  <div class="mood-history">
+    <h2>Prasann's Mood History</h2>
+    <ul id="prasannHistory"></ul>
+    <div class="current-mood" id="prasannCurrentMood">
+      Current Mood: Not set
+    </div>
+  </div>
 
   <script>
     let selectedMood = '';
     let moodEmoji = '';
 
+    const user = 'Prasann';  // Change to 'Kamakhya' if needed
+
     function selectMood(button, mood, emoji) {
-      // Remove 'selected' from all buttons
       const buttons = document.querySelectorAll('.mood-btn');
       buttons.forEach(btn => btn.classList.remove('selected'));
-
-      // Add 'selected' to the clicked button
       button.classList.add('selected');
-
       selectedMood = mood;
       moodEmoji = emoji;
-
       document.getElementById('selectedMoodText').innerText = `You selected: ${emoji} ${mood}`;
     }
 
-    function submitMood(retry = false) {
+    function submitMood() {
       const feeling = document.getElementById('feelingText').value;
       const messageDiv = document.getElementById('thanksMessage');
       messageDiv.innerText = "⏳ Sending... Please wait";
@@ -134,10 +193,10 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ mood: selectedMood, feeling })
+        body: JSON.stringify({ user, mood: selectedMood, feeling })
       })
       .then(response => {
-        if (!response.ok) throw new Error('Server sleeping or unavailable');
+        if (!response.ok) throw new Error('Error while sending mood');
         return response.json();
       })
       .then(data => {
@@ -147,16 +206,42 @@
         document.getElementById('feelingText').value = '';
         document.getElementById('selectedMoodText').innerText = '';
         document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+        fetchMoodHistory(); // Update mood history
       })
       .catch(error => {
-        if (!retry) {
-          messageDiv.innerText = "🌙 Server might be waking up... retrying in 5 seconds ⏳";
-          setTimeout(() => submitMood(true), 5000);
-        } else {
-          messageDiv.innerText = "❌ Still not working. Please try again later.";
-        }
+        messageDiv.innerText = "❌ Failed to send mood.";
       });
     }
+
+    function fetchMoodHistory() {
+      // Fetch Prasann's mood history
+      fetch('https://mood-backend-rvf9.onrender.com/api/mood/Prasann')
+        .then(response => response.json())
+        .then(moods => {
+          const historyDiv = document.getElementById('prasannHistory');
+          const currentMoodDiv = document.getElementById('prasannCurrentMood');
+
+          historyDiv.innerHTML = moods.map(mood => `<li>${mood.mood} ${mood.feeling} - ${new Date(mood.timestamp).toLocaleString()}</li>`).join('');
+
+          if (moods.length > 0) {
+            const currentMood = moods[0];  // Most recent mood
+            currentMoodDiv.innerHTML = `Current Mood: ${currentMood.mood} ${currentMood.feeling}`;
+          } else {
+            currentMoodDiv.innerHTML = `Current Mood: Not set`;
+          }
+        });
+
+      // Fetch Kamakhya's mood history
+      fetch('https://mood-backend-rvf9.onrender.com/api/mood/Kamakhya')
+        .then(response => response.json())
+        .then(moods => {
+          const historyDiv = document.getElementById('kamakhyaHistory');
+          historyDiv.innerHTML = moods.map(mood => `<li>${mood.mood} ${mood.feeling} - ${new Date(mood.timestamp).toLocaleString()}</li>`).join('');
+        });
+    }
+
+    // Fetch on page load
+    fetchMoodHistory();
   </script>
 
 </body>
