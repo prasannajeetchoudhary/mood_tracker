@@ -293,7 +293,6 @@
   const submitBtn = document.getElementById('submitBtn');
   const messageDiv = document.getElementById('message');
   const tabButtons = document.querySelectorAll('.tab-btn');
-  const toggleHistoryBtns = document.querySelectorAll('.toggle-history');
 
   // State
   let selectedMood = null;
@@ -304,6 +303,15 @@
     loadDarkMode();
     setupEventListeners();
     loadData();
+  }
+
+  async function loadData() {
+    await Promise.all([
+      fetchTodayMoods('Kamakhya'),
+      fetchTodayMoods('Prasann'),
+      fetchMemories('Kamakhya'),
+      fetchMemories('Prasann')
+    ]);
   }
 
   // Event Listeners
@@ -335,12 +343,13 @@
     });
 
     // History toggle
-    toggleHistoryBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
+    document.querySelectorAll('.toggle-history').forEach(btn => {
+      btn.addEventListener('click', async function() {
         const user = this.dataset.user;
         const historyEl = document.getElementById(`${user}History`);
         
         if (historyEl.style.display === 'none') {
+          await fetchHistory(user);
           historyEl.style.display = 'block';
           this.textContent = '▲ Hide History';
         } else {
@@ -354,74 +363,53 @@
     darkModeToggle.addEventListener('click', toggleDarkMode);
   }
 
-  // Data Loading
-  async function loadData() {
-    await Promise.all([
-      fetchTodayMoods('Kamakhya'),
-      fetchTodayMoods('Prasann'),
-      fetchMemories('Kamakhya'),
-      fetchMemories('Prasann')
-    ]);
-  }
-
-  // Fetch today's moods
+  // Data Fetching
   async function fetchTodayMoods(user) {
     try {
       const response = await fetch(`${API_BASE}/mood/today/${user}`);
       const moods = await response.json();
-      
-      const todayEl = document.getElementById(`${user}Today`);
-      todayEl.innerHTML = moods.length 
+      document.getElementById(`${user}Today`).innerHTML = moods.length
         ? moods.map(mood => createMoodElement(mood, true)).join('')
         : '<li class="mood-entry">No moods today</li>';
     } catch (error) {
-      console.error(`Error loading ${user}'s today moods:`, error);
+      console.error(`Error loading today's moods for ${user}:`, error);
     }
   }
 
-  // Fetch full history (when expanded)
   async function fetchHistory(user) {
     try {
-      const response = await fetch(`${API_BASE}/mood/${user}`);
+      const historyEl = document.getElementById(`${user}History`);
+      historyEl.innerHTML = '<li class="mood-entry">Loading history...</li>';
+      
+      const response = await fetch(`${API_BASE}/mood/history/${user}`);
       const moods = await response.json();
       
-      // Auto-collapse entries older than 7 days
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      const historyEl = document.getElementById(`${user}History`);
-      historyEl.innerHTML = moods
-        .filter(mood => new Date(mood.timestamp) < sevenDaysAgo)
-        .map(mood => createMoodElement(mood, false))
-        .join('') || '<li class="mood-entry">No older moods</li>';
+      historyEl.innerHTML = moods.length
+        ? moods.map(mood => createMoodElement(mood, false)).join('')
+        : '<li class="mood-entry">No history yet</li>';
     } catch (error) {
-      console.error(`Error loading ${user}'s history:`, error);
+      console.error(`Error loading history for ${user}:`, error);
+      document.getElementById(`${user}History`).innerHTML = 
+        '<li class="mood-entry">Error loading history</li>';
     }
   }
 
-  // Fetch memories from last month
   async function fetchMemories(user) {
     try {
       const response = await fetch(`${API_BASE}/mood/memories/${user}`);
       const memories = await response.json();
-      
       const memoriesEl = document.getElementById(`${user}Memories`);
-      if (memories.length) {
-        memoriesEl.innerHTML = `
-          <div class="history-header">
-            <h3>On this day last month</h3>
-          </div>
-          ${memories.map(mood => createMoodElement(mood, false, true)).join('')}
-        `;
-      } else {
-        memoriesEl.innerHTML = '';
-      }
+      
+      memoriesEl.innerHTML = memories.length
+        ? `<h4>On this day last month</h4>
+           ${memories.map(mood => createMoodElement(mood, false, true)).join('')}`
+        : '';
     } catch (error) {
-      console.error(`Error loading ${user}'s memories:`, error);
+      console.error(`Error loading memories for ${user}:`, error);
     }
   }
 
-  // Submit new mood
+  // Mood Submission
   async function submitMood() {
     const user = userSelect.value;
     const feeling = feelingText.value.trim();
@@ -438,11 +426,7 @@
       const response = await fetch(`${API_BASE}/mood`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          user, 
-          mood: selectedMood, 
-          feeling: feeling || undefined 
-        })
+        body: JSON.stringify({ user, mood: selectedMood, feeling })
       });
 
       if (!response.ok) throw new Error('Failed to save mood');
@@ -468,8 +452,8 @@
     }
   }
 
-  // Create mood element HTML
-  function createMoodElement(mood, isToday, isMemory) {
+  // Helper Functions
+  function createMoodElement(mood, isToday, isMemory = false) {
     const date = new Date(mood.timestamp);
     const now = new Date();
     
@@ -478,10 +462,8 @@
       dateString = 'Today';
     } else if (date.toDateString() === now.toDateString()) {
       dateString = 'Today';
-    } else if (date.getFullYear() === now.getFullYear()) {
-      dateString = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     } else {
-      dateString = date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+      dateString = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
     
     return `
@@ -500,7 +482,6 @@
     `;
   }
 
-  // Dark mode toggle
   function toggleDarkMode() {
     document.body.classList.toggle('dark');
     const isDark = document.body.classList.contains('dark');
@@ -515,11 +496,9 @@
     }
   }
 
-  // Show message
   function showMessage(text, type) {
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
-    
     if (type === 'success') {
       setTimeout(() => {
         messageDiv.textContent = '';
@@ -528,19 +507,7 @@
     }
   }
 
-  // Initialize when history button is clicked
-  document.querySelectorAll('.toggle-history').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const user = this.dataset.user;
-      const historyEl = document.getElementById(`${user}History`);
-      
-      if (historyEl.style.display === 'none' && historyEl.innerHTML === '') {
-        fetchHistory(user);
-      }
-    });
-  });
-
-  // Start the app
+  // Initialize
   document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
