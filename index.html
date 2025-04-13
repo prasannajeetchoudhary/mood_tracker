@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mood Tracker</title>
+  <title>Couple Mood Tracker</title>
   <style>
     :root {
       --bg: #fff;
@@ -166,6 +166,7 @@
       border: none;
       color: var(--accent);
       cursor: pointer;
+      font-size: 0.9rem;
     }
 
     .mood-entry {
@@ -175,6 +176,10 @@
       margin-bottom: 10px;
       display: flex;
       gap: 15px;
+    }
+
+    .memory-entry {
+      background: var(--memory);
     }
 
     .mood-emoji {
@@ -192,7 +197,8 @@
     }
 
     .memory-badge {
-      background: var(--memory);
+      background: var(--accent);
+      color: white;
       padding: 2px 8px;
       border-radius: 10px;
       font-size: 0.7rem;
@@ -294,18 +300,14 @@
   const messageDiv = document.getElementById('message');
   const tabButtons = document.querySelectorAll('.tab-btn');
 
-  // State
-  let selectedMood = null;
-  let currentTab = 'Kamakhya';
-
   // Initialize
   function init() {
     loadDarkMode();
     setupEventListeners();
-    loadData();
+    loadInitialData();
   }
 
-  async function loadData() {
+  async function loadInitialData() {
     await Promise.all([
       fetchTodayMoods('Kamakhya'),
       fetchTodayMoods('Prasann'),
@@ -333,12 +335,11 @@
       btn.addEventListener('click', () => {
         tabButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentTab = btn.dataset.user;
-        
+        const user = btn.dataset.user;
         document.getElementById('KamakhyaTab').style.display = 
-          currentTab === 'Kamakhya' ? 'block' : 'none';
+          user === 'Kamakhya' ? 'block' : 'none';
         document.getElementById('PrasannTab').style.display = 
-          currentTab === 'Prasann' ? 'block' : 'none';
+          user === 'Prasann' ? 'block' : 'none';
       });
     });
 
@@ -401,7 +402,9 @@
       const memoriesEl = document.getElementById(`${user}Memories`);
       
       memoriesEl.innerHTML = memories.length
-        ? `<h4>On this day last month</h4>
+        ? `<div class="history-header">
+             <h3>On this day last month</h3>
+           </div>
            ${memories.map(mood => createMoodElement(mood, false, true)).join('')}`
         : '';
     } catch (error) {
@@ -467,7 +470,7 @@
     }
     
     return `
-      <li class="mood-entry" ${isMemory ? 'style="background:var(--memory)"' : ''}>
+      <li class="mood-entry ${isMemory ? 'memory-entry' : ''}">
         <div class="mood-emoji">${MOOD_EMOJIS[mood.mood] || ''}</div>
         <div class="mood-details">
           <strong>${mood.mood}</strong>
