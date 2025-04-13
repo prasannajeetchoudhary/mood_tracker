@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mood Tracker</title>
   <style>
     :root {
@@ -13,7 +13,7 @@
       --button: #ffe4ec;
       --hover: #ffb6c1;
       --selected: #ff4fa2;
-      --border: #e0e0e0;
+      --error: #ff4444;
     }
 
     body.dark {
@@ -24,26 +24,17 @@
       --button: #333;
       --hover: #444;
       --selected: #ff4081;
-      --border: #333;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0;
       padding: 20px;
-      min-height: 100vh;
+      display: flex;
+      justify-content: center;
       transition: background-color 0.3s, color 0.3s;
-      line-height: 1.5;
     }
 
     .app {
@@ -54,9 +45,9 @@
     .card {
       background-color: var(--card);
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     h1 {
@@ -70,49 +61,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
       margin-bottom: 16px;
     }
 
     select, button {
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 12px;
       border: none;
       background: var(--button);
       color: var(--text);
-      cursor: pointer;
       font-size: 1rem;
-      font-family: inherit;
-      transition: all 0.2s ease;
-    }
-
-    select {
-      flex: 1;
-      min-width: 120px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-    }
-
-    button {
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    button:focus, select:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
+      cursor: pointer;
     }
 
     .moods {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
       margin: 20px 0;
-      justify-items: center;
     }
 
     .mood-btn {
@@ -126,12 +93,8 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-
-    .mood-btn:hover {
-      transform: scale(1.1);
-      background-color: var(--hover);
+      transition: all 0.2s;
+      margin: 0 auto;
     }
 
     .mood-btn.selected {
@@ -143,20 +106,14 @@
     textarea {
       width: 100%;
       border-radius: 12px;
-      padding: 16px;
-      border: 1px solid var(--border);
+      padding: 14px;
+      border: 1px solid var(--button);
       font-size: 1rem;
       resize: none;
       background: var(--bg);
       color: var(--text);
-      margin-top: 8px;
+      margin-top: 10px;
       min-height: 100px;
-      font-family: inherit;
-    }
-
-    textarea::placeholder {
-      color: var(--text);
-      opacity: 0.6;
     }
 
     .submit-btn {
@@ -169,24 +126,17 @@
       font-size: 1rem;
       cursor: pointer;
       width: 100%;
-      transition: background 0.2s;
       font-weight: 600;
+      transition: background-color 0.2s;
     }
 
     .submit-btn:hover {
       background-color: var(--selected);
-      transform: translateY(-1px);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
     }
 
     .tabs {
       display: flex;
-      justify-content: space-around;
       margin-bottom: 16px;
-      gap: 8px;
     }
 
     .tab-btn {
@@ -194,7 +144,6 @@
       padding: 12px;
       border: none;
       background-color: var(--button);
-      border-radius: 12px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
@@ -208,65 +157,58 @@
     .history {
       max-height: 400px;
       overflow-y: auto;
-      padding: 8px;
+      padding: 10px;
     }
 
-    ul {
+    .history ul {
       padding: 0;
       list-style: none;
-      font-size: 0.95rem;
     }
 
-    li {
-      margin-bottom: 12px;
+    .history li {
       padding: 12px;
       background-color: var(--button);
       border-radius: 8px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    li::before {
-      content: attr(data-emoji);
-      font-size: 1.2rem;
+    .history li span:first-child {
+      font-size: 1.4rem;
     }
 
-    .msg {
-      text-align: center;
-      margin-top: 12px;
-      font-size: 1rem;
-      min-height: 24px;
+    .history li div {
+      flex: 1;
     }
 
-    .current-mood {
-      background: var(--button);
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    .timestamp {
+    .history .timestamp {
       font-size: 0.8rem;
       opacity: 0.8;
-      margin-left: auto;
+      text-align: right;
     }
 
-    @media (max-width: 500px) {
-      .card {
-        padding: 16px;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-      
-      .mood-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.8rem;
+    .message {
+      text-align: center;
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .message.error {
+      background-color: rgba(255, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .message.success {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #4CAF50;
+    }
+
+    @media (max-width: 600px) {
+      .moods {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -280,245 +222,212 @@
         <option value="Prasann">Prasann</option>
         <option value="Kamakhya">Kamakhya</option>
       </select>
-      <button class="toggle-mode" onclick="toggleDarkMode()" id="darkModeToggle" aria-label="Toggle dark mode">🌙 Dark Mode</button>
+      <button id="darkModeToggle">🌙 Dark Mode</button>
     </div>
 
     <div class="moods">
-      <button class="mood-btn" onclick="selectMood(this, 'Happy', '😊')" aria-label="Happy">😊</button>
-      <button class="mood-btn" onclick="selectMood(this, 'Sad', '😢')" aria-label="Sad">😢</button>
-      <button class="mood-btn" onclick="selectMood(this, 'Angry', '😠')" aria-label="Angry">😠</button>
-      <button class="mood-btn" onclick="selectMood(this, 'Loved', '😍')" aria-label="Loved">😍</button>
-      <button class="mood-btn" onclick="selectMood(this, 'Sick', '🤒')" aria-label="Sick">🤒</button>
-      <button class="mood-btn" onclick="selectMood(this, 'Tired', '🥱')" aria-label="Tired">🥱</button>
+      <button class="mood-btn" data-mood="Happy">😊</button>
+      <button class="mood-btn" data-mood="Sad">😢</button>
+      <button class="mood-btn" data-mood="Angry">😠</button>
+      <button class="mood-btn" data-mood="Loved">😍</button>
+      <button class="mood-btn" data-mood="Sick">🤒</button>
+      <button class="mood-btn" data-mood="Tired">🥱</button>
     </div>
 
-    <textarea id="feelingText" placeholder="What's on your mind? Share your thoughts... 💭"></textarea>
-    <button class="submit-btn" onclick="submitMood()">Send Mood 💌</button>
-    <div class="msg" id="thanksMessage"></div>
+    <textarea id="feelingText" placeholder="What's on your mind?"></textarea>
+    <button class="submit-btn" id="submitBtn">Send Mood 💌</button>
+    <div class="message" id="message"></div>
   </div>
 
   <div class="card">
     <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('Kamakhya')">Kamakhya</button>
-      <button class="tab-btn" onclick="showTab('Prasann')">Prasann</button>
+      <button class="tab-btn active" data-tab="Kamakhya">Kamakhya</button>
+      <button class="tab-btn" data-tab="Prasann">Prasann</button>
     </div>
 
-    <div id="KamakhyaTab" class="history">
+    <div class="history" id="KamakhyaTab">
       <ul id="kamakhyaHistory"></ul>
     </div>
 
-    <div id="PrasannTab" class="history" style="display: none;">
-      <div class="current-mood" id="prasannCurrentMood">Current Mood: Not set</div>
+    <div class="history" id="PrasannTab" style="display: none;">
       <ul id="prasannHistory"></ul>
     </div>
   </div>
 </div>
 
 <script>
-  let selectedMood = '';
-  let moodEmoji = '';
+  // API Configuration
+  const API_URL = 'https://mood-backend-rvf9.onrender.com/api/mood';
+  
+  // DOM Elements
+  const userSelect = document.getElementById('userSelect');
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const moodButtons = document.querySelectorAll('.mood-btn');
+  const feelingText = document.getElementById('feelingText');
+  const submitBtn = document.getElementById('submitBtn');
+  const messageDiv = document.getElementById('message');
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const kamakhyaHistory = document.getElementById('kamakhyaHistory');
+  const prasannHistory = document.getElementById('prasannHistory');
 
-  // Mood data with emoji mapping
-  const moodData = {
-    'Happy': '😊',
-    'Sad': '😢',
-    'Angry': '😠',
-    'Loved': '😍',
-    'Sick': '🤒',
-    'Tired': '🥱'
-  };
+  // State
+  let selectedMood = null;
 
-  function getSelectedUser() {
-    return document.getElementById('userSelect').value;
+  // Initialize the app
+  function init() {
+    loadDarkMode();
+    setupEventListeners();
+    fetchHistory('Kamakhya');
+    fetchHistory('Prasann');
   }
 
-  function selectMood(button, mood, emoji) {
-    document.querySelectorAll('.mood-btn').forEach(btn => {
-      btn.classList.remove('selected');
-      btn.setAttribute('aria-pressed', 'false');
+  // Event Listeners
+  function setupEventListeners() {
+    // Mood selection
+    moodButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        moodButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMood = btn.dataset.mood;
+      });
     });
-    button.classList.add('selected');
-    button.setAttribute('aria-pressed', 'true');
-    selectedMood = mood;
-    moodEmoji = emoji;
+
+    // Form submission
+    submitBtn.addEventListener('click', submitMood);
+    
+    // Tab switching
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const tab = btn.dataset.tab;
+        document.getElementById('KamakhyaTab').style.display = 
+          tab === 'Kamakhya' ? 'block' : 'none';
+        document.getElementById('PrasannTab').style.display = 
+          tab === 'Prasann' ? 'block' : 'none';
+      });
+    });
+
+    // Dark mode toggle
+    darkModeToggle.addEventListener('click', toggleDarkMode);
   }
 
-  function submitMood() {
-    const user = getSelectedUser();
-    const feeling = document.getElementById('feelingText').value.trim();
-    const msgDiv = document.getElementById('thanksMessage');
-
+  // Submit mood to backend
+  async function submitMood() {
+    const user = userSelect.value;
+    const feeling = feelingText.value.trim();
+    
     if (!selectedMood && !feeling) {
-      msgDiv.innerText = "Please select a mood or write something 💬";
-      msgDiv.style.color = 'var(--accent)';
+      showMessage('Please select a mood or write something', 'error');
       return;
     }
 
-    msgDiv.innerText = "Sending your mood... ⏳";
-    msgDiv.style.color = 'inherit';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user, 
+          mood: selectedMood, 
+          feeling: feeling || '' 
+        })
+      });
 
-    fetch('https://mood-backend-rvf9.onrender.com/api/mood', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        user, 
-        mood: selectedMood, 
-        feeling: feeling || null 
-      })
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
-    })
-    .then(() => {
-      msgDiv.innerHTML = "✅ Mood sent! <span style='font-size:1.2em'>" + moodEmoji + "</span>";
-      msgDiv.style.color = 'var(--accent)';
+      if (!response.ok) throw new Error('Failed to save mood');
+
+      showMessage('Mood saved successfully!', 'success');
       
       // Reset form
-      selectedMood = '';
-      moodEmoji = '';
-      document.getElementById('feelingText').value = '';
-      document.querySelectorAll('.mood-btn').forEach(btn => {
-        btn.classList.remove('selected');
-        btn.setAttribute('aria-pressed', 'false');
-      });
+      selectedMood = null;
+      moodButtons.forEach(btn => btn.classList.remove('selected'));
+      feelingText.value = '';
       
       // Refresh history
-      fetchMoodHistory();
-      
-      // Auto-hide message after 3 seconds
-      setTimeout(() => {
-        msgDiv.innerText = '';
-      }, 3000);
-    })
-    .catch((error) => {
+      fetchHistory(user);
+    } catch (error) {
       console.error('Error:', error);
-      msgDiv.innerText = "❌ Failed to send mood. Please try again.";
-      msgDiv.style.color = '#ff4444';
-    });
-  }
-
-  function showTab(user) {
-    document.getElementById('KamakhyaTab').style.display = user === 'Kamakhya' ? 'block' : 'none';
-    document.getElementById('PrasannTab').style.display = user === 'Prasann' ? 'block' : 'none';
-    
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.remove('active');
-      btn.setAttribute('aria-selected', 'false');
-    });
-    
-    const activeBtn = document.querySelector(`.tab-btn[onclick="showTab('${user}')"]`);
-    activeBtn.classList.add('active');
-    activeBtn.setAttribute('aria-selected', 'true');
-  }
-
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark");
-    const isDark = document.body.classList.contains("dark");
-    localStorage.setItem("darkMode", isDark);
-    
-    const toggleBtn = document.getElementById("darkModeToggle");
-    toggleBtn.innerText = isDark ? "🌞 Light Mode" : "🌙 Dark Mode";
-    toggleBtn.setAttribute('aria-label', isDark ? "Switch to light mode" : "Switch to dark mode");
-  }
-
-  function loadDarkMode() {
-    const saved = localStorage.getItem("darkMode");
-    if (saved === "true") {
-      document.body.classList.add("dark");
-      const toggleBtn = document.getElementById("darkModeToggle");
-      toggleBtn.innerText = "🌞 Light Mode";
-      toggleBtn.setAttribute('aria-label', "Switch to light mode");
+      showMessage('Failed to save mood. Please try again.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Mood 💌';
     }
   }
 
-  function formatHistoryItem(mood, feeling, timestamp) {
-    const emoji = moodData[mood] || '';
-    const date = new Date(timestamp);
-    const formattedDate = date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Fetch mood history
+  async function fetchHistory(user) {
+    const historyElement = user === 'Kamakhya' ? kamakhyaHistory : prasannHistory;
+    historyElement.innerHTML = '<li>Loading...</li>';
     
-    return `
-      <li data-emoji="${emoji}">
-        <span class="mood-text">${mood}${feeling ? ': ' + feeling : ''}</span>
-        <span class="timestamp">${formattedDate}</span>
-      </li>
-    `;
+    try {
+      const response = await fetch(`${API_URL}/${user}`);
+      const moods = await response.json();
+      
+      if (!moods.length) {
+        historyElement.innerHTML = '<li>No history yet</li>';
+        return;
+      }
+      
+      historyElement.innerHTML = moods.map(mood => `
+        <li>
+          <span>${getEmoji(mood.mood)}</span>
+          <div>
+            <strong>${mood.mood}</strong>
+            ${mood.feeling ? `<div>${mood.feeling}</div>` : ''}
+          </div>
+          <div class="timestamp">
+            ${new Date(mood.timestamp).toLocaleString()}
+          </div>
+        </li>
+      `).join('');
+    } catch (error) {
+      console.error('Error:', error);
+      historyElement.innerHTML = '<li>Error loading history</li>';
+    }
   }
 
-  function fetchMoodHistory() {
-    // Fetch Kamakhya's history
-    fetch('https://mood-backend-rvf9.onrender.com/api/mood/Kamakhya')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(moods => {
-        const historyList = document.getElementById('kamakhyaHistory');
-        if (moods.length === 0) {
-          historyList.innerHTML = '<li style="text-align:center;opacity:0.7;">No mood history yet</li>';
-        } else {
-          historyList.innerHTML = moods.map(m => 
-            formatHistoryItem(m.mood, m.feeling, m.timestamp)
-          ).join('');
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching Kamakhya history:', error);
-        document.getElementById('kamakhyaHistory').innerHTML = 
-          '<li style="color:#ff4444;">Error loading history</li>';
-      });
-
-    // Fetch Prasann's history
-    fetch('https://mood-backend-rvf9.onrender.com/api/mood/Prasann')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(moods => {
-        const historyList = document.getElementById('prasannHistory');
-        const currentMoodEl = document.getElementById('prasannCurrentMood');
-        
-        if (moods.length === 0) {
-          historyList.innerHTML = '<li style="text-align:center;opacity:0.7;">No mood history yet</li>';
-          currentMoodEl.innerText = 'Current Mood: Not set';
-        } else {
-          historyList.innerHTML = moods.map(m => 
-            formatHistoryItem(m.mood, m.feeling, m.timestamp)
-          ).join('');
-          
-          const latest = moods[0];
-          currentMoodEl.innerHTML = `Current Mood: ${latest.mood} ${moodData[latest.mood] || ''}<br>
-            <small>${latest.feeling || ''}</small>`;
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching Prasann history:', error);
-        document.getElementById('prasannHistory').innerHTML = 
-          '<li style="color:#ff4444;">Error loading history</li>';
-        document.getElementById('prasannCurrentMood').innerText = 'Error loading current mood';
-      });
+  // Dark mode functionality
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    localStorage.setItem('darkMode', isDark);
+    darkModeToggle.textContent = isDark ? '🌞 Light Mode' : '🌙 Dark Mode';
   }
 
-  // Initialize the app
-  window.onload = function() {
-    loadDarkMode();
-    fetchMoodHistory();
-    
-    // Add keyboard navigation for mood buttons
-    document.querySelectorAll('.mood-btn').forEach(button => {
-      button.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          button.click();
-        }
-      });
-    });
-  };
+  function loadDarkMode() {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+      document.body.classList.add('dark');
+      darkModeToggle.textContent = '🌞 Light Mode';
+    }
+  }
+
+  // Helper functions
+  function getEmoji(mood) {
+    const emojis = {
+      'Happy': '😊',
+      'Sad': '😢',
+      'Angry': '😠',
+      'Loved': '😍',
+      'Sick': '🤒',
+      'Tired': '🥱'
+    };
+    return emojis[mood] || '';
+  }
+
+  function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    if (type === 'success') {
+      setTimeout(() => messageDiv.textContent = '', 3000);
+    }
+  }
+
+  // Start the app
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
